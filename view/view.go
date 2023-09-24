@@ -4,18 +4,15 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
-var wg sync.WaitGroup
-
+var RoomEnabled bool = false
 type User string
 
 var UserName User
@@ -70,7 +67,7 @@ func chatWindow(a fyne.App){
 	window := a.NewWindow(fmt.Sprintf("RPC CHAT - %v", UserName))
 	window.SetMaster()
 	// items
-	tabs := buildTopMenuItems(window)
+	tabs := buildTopMenuItems(window, a)
 	window.SetContent(container.NewVBox(tabs))
 	// settings
 	window.Resize(fyne.Size{Width: float32(WINDOW_WIDTH), Height: float32(WINDOW_HEIGTH)})
@@ -80,10 +77,10 @@ func chatWindow(a fyne.App){
 }
 
 // add tab on top from screen
-func buildTopMenuItems(window fyne.Window) *container.AppTabs {
+func buildTopMenuItems(window fyne.Window, a fyne.App) *container.AppTabs {
+	rooms := buildRoomsList(window, a)
 	tabs := container.NewAppTabs(
-		container.NewTabItemWithIcon("Salas", theme.HomeIcon(), canvas.NewText("salas aq", nil)),
-		container.NewTabItemWithIcon("Chat", theme.InfoIcon(), buildChatLayout()),
+		container.NewTabItemWithIcon("Salas", theme.HomeIcon(), rooms),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
 
