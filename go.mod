@@ -2,7 +2,10 @@ module github.com/PyMarcus/rpc_chat
 
 go 1.21.0
 
-require fyne.io/fyne/v2 v2.4.0
+require (
+	fyne.io/fyne/v2 v2.4.0
+	github.com/mattn/go-sqlite3 v1.14.17
+)
 
 require (
 	fyne.io/systray v1.10.1-0.20230722100817-88df1e0ffa9a // indirect
