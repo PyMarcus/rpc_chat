@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/PyMarcus/rpc_chat/models"
 	"github.com/PyMarcus/rpc_chat/repository"
 	_ "github.com/mattn/go-sqlite3"
 )

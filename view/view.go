@@ -13,6 +13,7 @@ import (
 )
 
 var RoomEnabled bool = false
+
 type User string
 
 var UserName User
@@ -32,7 +33,7 @@ func buildTheFirstWindow() {
 	a := app.New()
 	log.Println("Starting first app")
 	window := a.NewWindow("RPC Chat")
-	
+
 	text := widget.NewLabel("RPC CHAT")
 	text.Importance = widget.DangerImportance
 	text.TextStyle.Bold = true
@@ -42,7 +43,7 @@ func buildTheFirstWindow() {
 	f := widget.NewForm(widget.NewFormItem("Entrar como: ", textContent))
 
 	button := widget.NewButton("Entrar", func() {
-		 func() {
+		func() {
 			UserName = User(strings.ToUpper(textContent.Text))
 			window.Hide()
 			chatWindow(a)
@@ -61,14 +62,14 @@ func buildTheFirstWindow() {
 	window.ShowAndRun()
 }
 
-func chatWindow(a fyne.App){
+func chatWindow(a fyne.App) {
 	// create window
 	log.Println("Start second app...")
 	window := a.NewWindow(fmt.Sprintf("RPC CHAT - %v", UserName))
 	window.SetMaster()
 	// items
 	tabs := buildTopMenuItems(window, a)
-	window.SetContent(container.NewVBox(tabs))
+	window.SetContent(tabs)
 	// settings
 	window.Resize(fyne.Size{Width: float32(WINDOW_WIDTH), Height: float32(WINDOW_HEIGTH)})
 	window.CenterOnScreen()
@@ -79,10 +80,12 @@ func chatWindow(a fyne.App){
 // add tab on top from screen
 func buildTopMenuItems(window fyne.Window, a fyne.App) *container.AppTabs {
 	rooms := buildRoomsList(window, a)
+		
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Salas", theme.HomeIcon(), rooms),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
+	
 
 	return tabs
 }

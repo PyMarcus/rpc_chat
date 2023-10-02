@@ -56,6 +56,7 @@ func (r Repository) InsertRoomsIntoDB(rooms []*models.Room) error {
 	return nil
 }
 
+// GetAllRooms returns room_id, room_name
 func (r Repository) GetAllRooms() ([]*models.Room, error) {
 	query := "SELECT * FROM rooms;"
 	rows, err := r.Conn.Query(query)
@@ -68,7 +69,7 @@ func (r Repository) GetAllRooms() ([]*models.Room, error) {
 	var rooms []*models.Room
 	for rows.Next() {
 		room := &models.Room{}
-		_ = rows.Scan(&room.Id, room.Name)
+		_ = rows.Scan(&room.Id, &room.Name)
 		rooms = append(rooms, room)
 	}
 
@@ -82,13 +83,13 @@ func (r Repository) GetRoomById(id int64) (*models.Room, error) {
 
 	err := row.Scan(&room.Id, &room.Name)
 
-	if err != nil{
-		return nil, err 
+	if err != nil {
+		return nil, err
 	}
-	return room, nil 
+	return room, nil
 }
 
-func (r Repository) ListAllMessages(roomId int64) ([]*models.Message, error){
+func (r Repository) ListAllMessages(roomId int64) ([]*models.Message, error) {
 	query := "SELECT * FROM messages WHERE room_id = ?;"
 	rows, err := r.Conn.Query(query, roomId)
 	if err != nil {
