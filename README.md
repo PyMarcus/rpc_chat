@@ -13,3 +13,9 @@ Chat based written over Remote Procedure Call (RPC)
 
 ![image](https://github.com/PyMarcus/rpc_chat/assets/88283829/46f99275-eebd-4481-88ba-62fbe1783125)
 
+### Run
+
+https://github.com/PyMarcus/rpc_chat/assets/88283829/930af0e0-47bf-4929-a69c-c65d60db8ec2
+
+
+
