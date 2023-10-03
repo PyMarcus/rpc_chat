@@ -1,8 +1,8 @@
 package view
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -10,15 +10,18 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/PyMarcus/rpc_chat/connection"
+	"github.com/PyMarcus/rpc_chat/models"
 	"github.com/PyMarcus/rpc_chat/repository"
 )
+
+var CurrentIdRoom int64
 
 func getConn() *sql.DB {
 	conn, _ := connection.ConnectionSQL()
 	return conn
 }
 
-func buildRoomsList(window fyne.Window, a fyne.App) *widget.Table {
+func buildRoomsList(window fyne.Window, a fyne.App, user string) *widget.Table {
 	conn := getConn()
 	data := repository.NewRepository(conn)
 
@@ -42,6 +45,9 @@ func buildRoomsList(window fyne.Window, a fyne.App) *widget.Table {
 				b := widget.NewButtonWithIcon("Entrar", theme.LoginIcon(), func() {
 					RoomEnabled = true
 					buildChatLayout(a, window)
+					id := int64(i.Row + 1)
+					CurrentIdRoom = id
+					data.InsertUser(models.Message{Id:1, User: user, Message: "Entrou na sala", RoomId: id})
 				})
 
 				b.Importance = widget.SuccessImportance

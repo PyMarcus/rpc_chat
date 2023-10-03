@@ -79,7 +79,7 @@ func chatWindow(a fyne.App) {
 
 // add tab on top from screen
 func buildTopMenuItems(window fyne.Window, a fyne.App) *container.AppTabs {
-	rooms := buildRoomsList(window, a)
+	rooms := buildRoomsList(window, a, string(UserName))
 		
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Salas", theme.HomeIcon(), rooms),

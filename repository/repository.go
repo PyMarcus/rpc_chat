@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/PyMarcus/rpc_chat/models"
 	_ "github.com/mattn/go-sqlite3"
@@ -56,6 +57,11 @@ func (r Repository) InsertRoomsIntoDB(rooms []*models.Room) error {
 	return nil
 }
 
+func (r Repository) DeleteFromMessages(){
+	query := "Delete from messages;"
+	r.Conn.Exec(query)
+}
+
 // GetAllRooms returns room_id, room_name
 func (r Repository) GetAllRooms() ([]*models.Room, error) {
 	query := "SELECT * FROM rooms;"
@@ -90,9 +96,10 @@ func (r Repository) GetRoomById(id int64) (*models.Room, error) {
 }
 
 func (r Repository) ListAllMessages(roomId int64) ([]*models.Message, error) {
-	query := "SELECT * FROM messages WHERE room_id = ?;"
+	query := "SELECT * FROM messages WHERE room_id = ? order by id desc;"
 	rows, err := r.Conn.Query(query, roomId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -101,7 +108,28 @@ func (r Repository) ListAllMessages(roomId int64) ([]*models.Message, error) {
 	var messages []*models.Message
 	for rows.Next() {
 		message := &models.Message{}
-		_ = rows.Scan(&message.Id, message.User, message.Message, message.RoomId)
+		_ = rows.Scan(&message.Id, &message.User, &message.Message, &message.RoomId)
+		messages = append(messages, message)
+	}
+
+	return messages, nil
+}
+
+func (r Repository) ListAllUsers(roomId int64) ([]*models.UsersModel, error) {
+	query := "SELECT user FROM messages WHERE room_id = ?;"
+	log.Println(query, roomId)
+	rows, err := r.Conn.Query(query, roomId)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var messages []*models.UsersModel
+	for rows.Next() {
+		message := &models.UsersModel{}
+		_ = rows.Scan(&message.Name)
 		messages = append(messages, message)
 	}
 

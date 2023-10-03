@@ -11,3 +11,7 @@ type Message struct{
 	Message string  `db:"message" json:"message"`
 	RoomId  int64   `db:"room_id" json:"room_id"`
 }
+
+type UsersModel struct{
+	Name string `db:"name" json:"name"`
+}

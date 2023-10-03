@@ -2,7 +2,9 @@ package connection
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"net/rpc"
 
 	"github.com/PyMarcus/rpc_chat/repository"
 	_ "github.com/mattn/go-sqlite3"
@@ -32,4 +34,13 @@ func setupDb(sqlDB *sql.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func ServerRPCConnection(ip, port string) *rpc.Client {
+	client, err := rpc.DialHTTP("tcp", fmt.Sprintf("%s:%s", ip, port))
+
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
