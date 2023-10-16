@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
+	"github.com/PyMarcus/rpc_chat/models"
+	"github.com/PyMarcus/rpc_chat/repository"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -80,12 +83,105 @@ func chatWindow(a fyne.App) {
 // add tab on top from screen
 func buildTopMenuItems(window fyne.Window, a fyne.App) *container.AppTabs {
 	rooms := buildRoomsList(window, a, string(UserName))
-		
+	pvChat := buildPvChat(window, a)
+	chat := buildChatPV(window, a)
+
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Salas", theme.HomeIcon(), rooms),
+		container.NewTabItemWithIcon("Chat privado", theme.MailSendIcon(), pvChat),
+		container.NewTabItemWithIcon("Mensagens recebidas", theme.MailReplyIcon(), chat),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
-	
 
 	return tabs
+}
+
+func buildPvChat(window fyne.Window, a fyne.App) *fyne.Container {
+	conn := getConn()
+	data := repository.NewRepository(conn)
+
+	text := widget.NewLabel("Enviar mensagem")
+	text.Importance = widget.WarningImportance
+	text.TextStyle.Bold = true
+	text.Alignment = fyne.TextAlignCenter
+
+	textContent := widget.NewEntry()
+	f := widget.NewForm(widget.NewFormItem("Mensagem para: ", textContent))
+	textContentMessage := widget.NewEntry()
+	f2 := widget.NewForm(widget.NewFormItem("Mensagem: ", textContentMessage))
+
+	button := widget.NewButton("Enviar", func() {
+		pv := &models.Pv{Name: textContent.Text, Message: textContentMessage.Text, From: string(UserName)}
+		data.InsertPvMessage(pv)
+	})
+
+	return container.NewVBox(f, f2, button)
+}
+
+func buildChatPV(window fyne.Window, a fyne.App) *fyne.Container {
+	var txt string
+
+	conn := getConn()
+	data := repository.NewRepository(conn)
+
+	text := widget.NewLabel("Mensagens recebidas")
+	text.Importance = widget.WarningImportance
+	text.TextStyle.Bold = true
+	text.Alignment = fyne.TextAlignCenter
+
+	result, err := data.GetPvMessage(string(UserName))
+
+	if err != nil{
+		log.Println("Fail to read pv message ", err)
+		result = nil
+	}
+
+	chatText := widget.NewMultiLineEntry()
+	chatText.SetMinRowsVisible(MAX_LINES_CHAT)
+
+	savedMessages = make(map[string]bool)
+	go func() {
+		for range time.Tick(5 * time.Second){
+			for _, m := range result {
+				messageID := fmt.Sprintf("%s: %s", m.From, m.Message)
+				if _, found := savedMessages[messageID]; !found {
+					item := fmt.Sprintf("%s: %s\n\n", m.From, m.Message)
+					txt += item
+					savedMessages[messageID] = true
+				}
+			}
+			item := chatText.Text + "\n"
+			if !strings.Contains(txt, item) {
+				txt += item
+			}
+			chatText.SetText(txt)
+			txt = ""
+		}
+	}()
+
+	btn := widget.NewButton("Atualizar", func() {
+		// sim fiz isso às pressas :D
+		go func() {
+			result, _ := data.GetPvMessage(string(UserName))
+
+			for range time.Tick(5 * time.Second){
+				for _, m := range result {
+					messageID := fmt.Sprintf("%s: %s", m.From, m.Message)
+					if _, found := savedMessages[messageID]; !found {
+						item := fmt.Sprintf("%s: %s\n\n", m.From, m.Message)
+						txt += item
+						savedMessages[messageID] = true
+					}
+				}
+				item := chatText.Text + "\n"
+				if !strings.Contains(txt, item) {
+					txt += item
+				}
+				chatText.SetText(txt)
+				txt = ""
+			}
+		}()
+	})
+	
+	return container.NewVBox(chatText, btn)
 }

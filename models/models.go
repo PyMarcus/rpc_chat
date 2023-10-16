@@ -5,6 +5,12 @@ type Room struct {
 	Name string  `db:"name" json:"name"`
 }
 
+type Pv struct{
+	Name string  `db:"name" json:"name"`
+	Message string  `db:"message" json:"message"`
+	From string `db:"from" json:"from"`
+}
+
 type Message struct{
 	Id		int64	`db:"id" json:"id"`
 	User 	string  `db:"user" json:"user"`

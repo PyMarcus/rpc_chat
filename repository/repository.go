@@ -25,12 +25,24 @@ func (r *Repository) Migrate() error {
 					room_id INTEGER NOT NULL
 				);`
 
+	pvMessages := `create table if not exists pv(
+						id INTEGER PRIMARY KEY AUTOINCREMENT,
+						name text not null,
+						message text not null,
+						from text not null
+					);`
+
 	_, err := r.Conn.Exec(firstQuery)
 	if err != nil {
 		return err
 	}
 
 	_, err = r.Conn.Exec(secondQuery)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.Conn.Exec(pvMessages)
 	if err != nil {
 		return err
 	}
@@ -55,6 +67,35 @@ func (r Repository) InsertRoomsIntoDB(rooms []*models.Room) error {
 		}
 	}
 	return nil
+}
+
+func (r Repository) InsertPvMessage(pv *models.Pv) error {
+	_, err := r.Conn.Exec("INSERT INTO pv (name, message, fromm) VALUES (?, ?, ?);", pv.Name, pv.Message, pv.From);
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func (r Repository) GetPvMessage(name string) ([]*models.Pv, error){
+	query := "SELECT fromm, message FROM pv where upper(name) = ?;"
+	log.Println(query, name)
+	rows, err := r.Conn.Query(query, name)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var pv []*models.Pv
+	for rows.Next() {
+		text := &models.Pv{}
+		_ = rows.Scan(&text.From, &text.Message)
+		pv = append(pv, text)
+	}
+
+	return pv, nil
 }
 
 func (r Repository) DeleteFromMessages(){
